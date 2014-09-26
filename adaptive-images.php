@@ -12,12 +12,26 @@
 
 /* CONFIG ----------------------------------------------------------------------------------------------------------- */
 
-$resolutions   = array(1382, 992, 768, 480); // the resolution break-points to use (screen widths, in pixels)
+$resolutions   = array(1600, 1366, 1024, 800, 480); // the resolution break-points to use (screen widths, in pixels)
 $cache_path    = "ai-cache"; // where to store the generated re-sized images. Specify from your document root!
 $jpg_quality   = 75; // the quality of any generated JPGs on a scale of 0 to 100
-$sharpen       = TRUE; // Shrinking images can blur details, perform a sharpen on re-scaled images?
+$sharpen       = FALSE; // Shrinking images can blur details, perform a sharpen on re-scaled images?
 $watch_cache   = TRUE; // check that the adapted image isn't stale (ensures updated source images are re-cached)
 $browser_cache = 60*60*24*7; // How long the BROWSER cache should last (seconds, minutes, hours, days. 7days by default)
+
+/* Png optimisation function */
+
+function optimisePng($path) {
+  $colors = 256;
+  $reduced_colors = preg_match('/\.(\d+)\.png/', $path, $matches);
+  if ($reduced_colors) {
+    $colors = $matches[1];
+  }
+
+  exec("pngquant --ext .png --force $colors $path");
+  exec("optipng $path");
+  exec("advpng -z4 $path");
+}
 
 /* END CONFIG ----------------------------------------------------------------------------------------------------------
 ------------------------ Don't edit anything after this line unless you know what you're doing -------------------------
@@ -30,7 +44,7 @@ $requested_file = basename($requested_uri);
 $source_file    = $document_root.$requested_uri;
 $resolution     = FALSE;
 
-/* Mobile detection 
+/* Mobile detection
    NOTE: only used in the event a cookie isn't available. */
 function is_mobile() {
   $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']);
@@ -170,7 +184,7 @@ function generateImage($source_file, $cache_file, $resolution) {
     $transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
     imagefilledrectangle($dst, 0, 0, $new_width, $new_height, $transparent);
   }
-  
+
   ImageCopyResampled($dst, $src, 0, 0, 0, 0, $new_width, $new_height, $width, $height); // do the resize in memory
   ImageDestroy($src);
 
@@ -189,7 +203,7 @@ function generateImage($source_file, $cache_file, $resolution) {
   $cache_dir = dirname($cache_file);
 
   // does the directory exist already?
-  if (!is_dir($cache_dir)) { 
+  if (!is_dir($cache_dir)) {
     if (!mkdir($cache_dir, 0755, true)) {
       // check again if it really doesn't exist to protect against race conditions
       if (!is_dir($cache_dir)) {
@@ -208,6 +222,7 @@ function generateImage($source_file, $cache_file, $resolution) {
   switch ($extension) {
     case 'png':
       $gotSaved = ImagePng($dst, $cache_file);
+      optimisePng($cache_file);
     break;
     case 'gif':
       $gotSaved = ImageGif($dst, $cache_file);
