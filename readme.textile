@@ -4,7 +4,7 @@ Is a solution to automatically create, cache, and deliver device-appropriate ver
 
 h2. Fork notes
 
-This fork optimises PNG images after scaling them down. It requires optipng, advpng, advdef, and pngquant to be available as command line scripts. The latest compiled versions are preferable, as they will result in better optimisation. By default PNGs are optimised to have 256 colours. To change this, add the number of colours before the extension. For example, some-image.16.png will have 16 colours. Make sure the originals are also optimised, as the originals are used if scaling is not required.
+This fork optimises PNG images after scaling them down. It pngquant to be available as command line scripts. The latest compiled version is preferable, as it will result in better optimisation. By default PNGs are optimised to have 256 colours. To change this, add the number of colours before the extension. For example, some-image.16.png will have 16 colours. Make sure the originals are also optimised, as the originals are used if scaling is not required.
 
 h2. Benefits
 
