@@ -31,6 +31,7 @@ function optimisePng($path) {
   exec("pngquant --ext .png --force $colors $path");
   exec("optipng $path");
   exec("advpng -z4 $path");
+  exec("advdef -z4 $path");
 }
 
 /* END CONFIG ----------------------------------------------------------------------------------------------------------
